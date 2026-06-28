@@ -1,5 +1,5 @@
 'use client';
-import { ChevronLeft, ChevronRight, Folder } from 'lucide-react';
+import { ChevronRight, Folder } from 'lucide-react';
 import { useState } from 'react';
 import { DBProject } from '../hooks/useProjects';
 
@@ -32,53 +32,39 @@ function MiniCalendar({ year, month, onMonthChange, onDateSelect, selectedDate }
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
   const weeks = ['日', '月', '火', '水', '木', '金', '土'];
-
   const eventDates = scheduleEvents
     .filter(e => e.date.getFullYear() === year && e.date.getMonth() === month)
     .map(e => e.date.getDate());
-
-  const cells = [];
+  const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e4e2dc', borderRadius: 12, padding: '16px', minWidth: 260 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <button onClick={() => onMonthChange(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5c5a54', padding: '4px' }}>
-          <ChevronLeft size={16} />
-        </button>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1917' }}>
-          {year}年{month + 1}月
-        </div>
-        <button onClick={() => onMonthChange(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5c5a54', padding: '4px' }}>
-          <ChevronRight size={16} />
-        </button>
+        <button onClick={() => onMonthChange(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5c5a54', padding: '4px' }}>‹</button>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1917' }}>{year}年{month + 1}月</div>
+        <button onClick={() => onMonthChange(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5c5a54', padding: '4px' }}>›</button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, textAlign: 'center' }}>
         {weeks.map((w, i) => (
           <div key={w} style={{ fontSize: 10, color: i === 0 ? '#c0392b' : i === 6 ? '#1e5fd4' : '#9e9b93', padding: '4px 0', fontWeight: 500 }}>{w}</div>
         ))}
         {cells.map((d, i) => {
-          if (!d) return <div key={`empty-${i}`} />;
+          if (!d) return <div key={`e-${i}`} />;
           const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
           const isSelected = selectedDate && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === d;
           const hasEvent = eventDates.includes(d);
-          const dayOfWeek = (firstDay + d - 1) % 7;
+          const dow = (firstDay + d - 1) % 7;
           return (
             <div key={d} onClick={() => onDateSelect(new Date(year, month, d))} style={{
-              padding: '5px 2px', borderRadius: 6, cursor: 'pointer', position: 'relative',
+              padding: '5px 2px', borderRadius: 6, cursor: 'pointer',
               background: isSelected ? '#1e5fd4' : isToday ? '#eef3fd' : 'transparent',
-              color: isSelected ? '#fff' : isToday ? '#1e5fd4' : dayOfWeek === 0 ? '#c0392b' : dayOfWeek === 6 ? '#1e5fd4' : '#1a1917',
+              color: isSelected ? '#fff' : isToday ? '#1e5fd4' : dow === 0 ? '#c0392b' : dow === 6 ? '#1e5fd4' : '#1a1917',
               fontSize: 12, fontWeight: isToday ? 600 : 400,
             }}>
               {d}
-              {hasEvent && (
-                <div style={{
-                  width: 4, height: 4, borderRadius: '50%',
-                  background: isSelected ? '#fff' : '#1e5fd4',
-                  margin: '2px auto 0',
-                }} />
-              )}
+              {hasEvent && <div style={{ width: 4, height: 4, borderRadius: '50%', background: isSelected ? '#fff' : '#1e5fd4', margin: '2px auto 0' }} />}
             </div>
           );
         })}
@@ -104,65 +90,45 @@ export function CalendarView({ onProjectSelect }: { onProjectSelect: (id: string
     ? scheduleEvents.filter(e =>
         e.date.getFullYear() === selectedDate.getFullYear() &&
         e.date.getMonth() === selectedDate.getMonth() &&
-        e.date.getDate() === selectedDate.getDate()
-      )
-    : scheduleEvents.filter(e =>
-        e.date.getFullYear() === year && e.date.getMonth() === month
-      ).sort((a, b) => a.date.getTime() - b.date.getTime());
+        e.date.getDate() === selectedDate.getDate())
+    : scheduleEvents.filter(e => e.date.getFullYear() === year && e.date.getMonth() === month)
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return (
     <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
       <div style={{ width: 300, minWidth: 300, padding: '20px 16px', borderRight: '1px solid #e4e2dc', background: '#f9f8f6', overflowY: 'auto' }}>
-        <MiniCalendar
-          year={year} month={month}
-          onMonthChange={handleMonthChange}
-          onDateSelect={setSelectedDate}
-          selectedDate={selectedDate}
-        />
+        <MiniCalendar year={year} month={month} onMonthChange={handleMonthChange} onDateSelect={setSelectedDate} selectedDate={selectedDate} />
         <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#9e9b93', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
-            凡例
-          </div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#9e9b93', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>凡例</div>
           {Object.entries(statusConfig).map(([key, cfg]) => (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, fontSize: 11, color: '#5c5a54' }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: cfg.color }} />
-              {cfg.label}
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: cfg.color }} />{cfg.label}
             </div>
           ))}
         </div>
       </div>
-
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1917' }}>
-              {selectedDate
-                ? `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日のスケジュール`
-                : `${year}年${month + 1}月のスケジュール`}
+              {selectedDate ? `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日のスケジュール` : `${year}年${month + 1}月のスケジュール`}
             </div>
             <div style={{ fontSize: 11, color: '#9e9b93', marginTop: 2 }}>{filteredEvents.length}件の予定</div>
           </div>
           {selectedDate && (
-            <button onClick={() => setSelectedDate(null)} style={{
-              fontSize: 11, color: '#1e5fd4', background: '#eef3fd',
-              border: '1px solid #b8ccf5', borderRadius: 6, padding: '4px 10px', cursor: 'pointer'
-            }}>月全体を表示</button>
+            <button onClick={() => setSelectedDate(null)} style={{ fontSize: 11, color: '#1e5fd4', background: '#eef3fd', border: '1px solid #b8ccf5', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>月全体を表示</button>
           )}
         </div>
-
         {filteredEvents.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#9e9b93', fontSize: 13, marginTop: 60 }}>
-            この日程に予定はありません
-          </div>
+          <div style={{ textAlign: 'center', color: '#9e9b93', fontSize: 13, marginTop: 60 }}>この日程に予定はありません</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredEvents.map((s, i) => {
               const cfg = statusConfig[s.status];
               return (
                 <div key={i} onClick={() => s.proj && onProjectSelect(s.proj)} style={{
-                  display: 'flex', gap: 0, background: '#fff',
-                  border: '1px solid #e4e2dc', borderRadius: 10, overflow: 'hidden',
-                  cursor: s.proj ? 'pointer' : 'default',
+                  display: 'flex', gap: 0, background: '#fff', border: '1px solid #e4e2dc',
+                  borderRadius: 10, overflow: 'hidden', cursor: s.proj ? 'pointer' : 'default',
                 }}
                   onMouseEnter={e => s.proj && (e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)')}
                   onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
@@ -178,10 +144,7 @@ export function CalendarView({ onProjectSelect }: { onProjectSelect: (id: string
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1917', marginBottom: 3 }}>{s.title}</div>
                       <div style={{ fontSize: 11, color: '#9e9b93' }}>{s.time} — {s.detail}</div>
                     </div>
-                    <span style={{
-                      fontSize: 11, padding: '3px 9px', borderRadius: 10, flexShrink: 0,
-                      background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`
-                    }}>{cfg.label}</span>
+                    <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 10, flexShrink: 0, background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>{cfg.label}</span>
                   </div>
                 </div>
               );
@@ -209,13 +172,10 @@ export function ProjectsList({ onProjectSelect, dbProjects }: ProjectsListProps)
         {list.map((p) => {
           const cfg = statusConfig[p.status] || statusConfig.active;
           const borderColor = borderColorDB[p.status] || '#1e5fd4';
-          const memberCount = p.project_members?.length ?? 0;
-          const docCount = p.documents?.length ?? 0;
           return (
             <div key={p.id} onClick={() => onProjectSelect(p.id)} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '13px 16px', background: '#fff',
-              border: '1px solid #e4e2dc', borderLeft: `3px solid ${borderColor}`,
+              display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px',
+              background: '#fff', border: '1px solid #e4e2dc', borderLeft: `3px solid ${borderColor}`,
               borderRadius: 8, cursor: 'pointer',
             }}
               onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)')}
@@ -225,26 +185,15 @@ export function ProjectsList({ onProjectSelect, dbProjects }: ProjectsListProps)
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1917' }}>{p.name}</div>
                 <div style={{ fontSize: 11, color: '#9e9b93', marginTop: 2 }}>
-                  {p.client}　·　メンバー {memberCount}名　·　書類 {docCount}件
+                  {p.client}　·　メンバー {p.project_members?.length ?? 0}名　·　書類 {p.documents?.length ?? 0}件
                 </div>
               </div>
-              <span style={{
-                fontSize: 11, padding: '2px 9px', borderRadius: 10,
-                background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`
-              }}>{cfg.label}</span>
+              <span style={{ fontSize: 11, padding: '2px 9px', borderRadius: 10, background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>{cfg.label}</span>
               <ChevronRight size={14} color="#9e9b93" />
             </div>
           );
         })}
       </div>
     </div>
-  );
-}
-
-function ChevronRight({ size, color }: { size: number; color: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
   );
 }
