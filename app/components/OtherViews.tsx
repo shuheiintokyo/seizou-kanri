@@ -1,21 +1,49 @@
 'use client';
 import { ChevronRight, Folder } from 'lucide-react';
-import { projects, statusConfig, statusBorderColor } from '../data/mockData';
+import { projects as mockProjects, statusConfig, statusBorderColor } from '../data/mockData';
+import { DBProject } from '../hooks/useProjects';
 
-export function ProjectsList({ onProjectSelect }: { onProjectSelect: (id: string) => void }) {
+const statusConfigDB: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  urgent: { label: '要対応', color: '#c0392b', bg: '#fdf0ef', border: '#f5c6c2' },
+  active: { label: '進行中', color: '#1e5fd4', bg: '#eef3fd', border: '#b8ccf5' },
+  pending: { label: 'レビュー待ち', color: '#b45309', bg: '#fef9ec', border: '#fde68a' },
+  done: { label: '完了', color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' },
+};
+
+const borderColorDB: Record<string, string> = {
+  urgent: '#c0392b', active: '#1e5fd4', pending: '#b45309', done: '#15803d',
+};
+
+interface ProjectsListProps {
+  onProjectSelect: (id: string) => void;
+  dbProjects?: DBProject[];
+}
+
+export function ProjectsList({ onProjectSelect, dbProjects }: ProjectsListProps) {
+  const list = dbProjects && dbProjects.length > 0 ? dbProjects : mockProjects;
+
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px' }}>
       <div style={{ fontSize: 11, color: '#9e9b93', fontWeight: 500, marginBottom: 14, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
         全プロジェクト一覧
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {projects.map(p => {
-          const cfg = statusConfig[p.status];
+        {list.map((p) => {
+          const isDB = dbProjects && dbProjects.length > 0;
+          const cfg = isDB ? statusConfigDB[p.status] : statusConfig[p.status as keyof typeof statusConfig];
+          const borderColor = isDB ? borderColorDB[p.status] : statusBorderColor[p.status as keyof typeof statusBorderColor];
+          const memberCount = isDB
+            ? (p as DBProject).project_members?.length ?? 0
+            : (p as typeof mockProjects[0]).members?.length ?? 0;
+          const docCount = isDB
+            ? (p as DBProject).documents?.length ?? 0
+            : (p as typeof mockProjects[0]).documents?.length ?? 0;
+
           return (
             <div key={p.id} onClick={() => onProjectSelect(p.id)} style={{
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '13px 16px', background: '#fff',
-              border: '1px solid #e4e2dc', borderLeft: `3px solid ${statusBorderColor[p.status]}`,
+              border: '1px solid #e4e2dc', borderLeft: `3px solid ${borderColor}`,
               borderRadius: 8, cursor: 'pointer',
             }}
               onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)')}
@@ -25,7 +53,7 @@ export function ProjectsList({ onProjectSelect }: { onProjectSelect: (id: string
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1917' }}>{p.name}</div>
                 <div style={{ fontSize: 11, color: '#9e9b93', marginTop: 2 }}>
-                  {p.client}　·　メンバー {p.members.length}名　·　書類 {p.documents.length}件
+                  {p.client}　·　メンバー {memberCount}名　·　書類 {docCount}件
                 </div>
               </div>
               <span style={{
@@ -68,7 +96,7 @@ export function CalendarView({ onProjectSelect }: { onProjectSelect: (id: string
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {schedule.map((s, i) => {
-          const cfg = statusConfig[s.status];
+          const cfg = statusConfigDB[s.status];
           return (
             <div key={i} onClick={() => onProjectSelect(s.proj)} style={{
               display: 'flex', gap: 14, alignItems: 'center',

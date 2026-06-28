@@ -5,7 +5,9 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import ProjectRoom from './components/ProjectRoom';
 import { ProjectsList, CalendarView } from './components/OtherViews';
-import { projects } from './data/mockData';
+import NewProjectModal from './components/NewProjectModal';
+import { useProjects } from './hooks/useProjects';
+import { projects as mockProjects } from './data/mockData';
 
 const viewTitles: Record<string, string> = {
   dashboard: 'ダッシュボード',
@@ -16,6 +18,8 @@ const viewTitles: Record<string, string> = {
 export default function Home() {
   const [view, setView] = useState('dashboard');
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const { projects: dbProjects, loading, refresh } = useProjects();
 
   const handleProjectSelect = (id: string) => {
     setActiveProjectId(id);
@@ -27,16 +31,28 @@ export default function Home() {
     setActiveProjectId(null);
   };
 
-  const activeProject = activeProjectId ? projects.find(p => p.id === activeProjectId) : null;
-  const topbarTitle = activeProject ? activeProject.name : viewTitles[view] || '';
+  const activeProject = activeProjectId
+    ? mockProjects.find(p => p.id === activeProjectId)
+    : null;
+
+  const topbarTitle = activeProject
+    ? activeProject.name
+    : viewTitles[view] || '';
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {showModal && (
+        <NewProjectModal
+          onClose={() => setShowModal(false)}
+          onCreated={() => { refresh(); setView('projects'); }}
+        />
+      )}
       <Sidebar
         activeView={view}
         activeProjectId={activeProjectId}
         onViewChange={handleViewChange}
         onProjectSelect={handleProjectSelect}
+        dbProjects={dbProjects}
       />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f5f4f1' }}>
         <div style={{
@@ -44,9 +60,16 @@ export default function Home() {
           background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1917' }}>{topbarTitle}</div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button style={{
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1917' }}>
+            {loading ? '読み込み中...' : topbarTitle}
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {!loading && dbProjects.length > 0 && (
+              <span style={{ fontSize: 11, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: 10 }}>
+                DB接続済 {dbProjects.length}件
+              </span>
+            )}
+            <button onClick={() => setShowModal(true)} style={{
               display: 'inline-flex', alignItems: 'center', gap: 5,
               padding: '6px 14px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
               border: '1px solid #1e5fd4', background: '#1e5fd4', color: '#fff', fontFamily: 'inherit'
@@ -57,7 +80,7 @@ export default function Home() {
         </div>
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {view === 'dashboard' && <Dashboard onProjectSelect={handleProjectSelect} />}
-          {view === 'projects' && <ProjectsList onProjectSelect={handleProjectSelect} />}
+          {view === 'projects' && <ProjectsList onProjectSelect={handleProjectSelect} dbProjects={dbProjects} />}
           {view === 'calendar' && <CalendarView onProjectSelect={handleProjectSelect} />}
           {view === 'project' && activeProject && <ProjectRoom project={activeProject} />}
         </div>
