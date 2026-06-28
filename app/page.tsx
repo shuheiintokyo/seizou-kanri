@@ -7,7 +7,6 @@ import ProjectRoom from './components/ProjectRoom';
 import { ProjectsList, CalendarView } from './components/OtherViews';
 import NewProjectModal from './components/NewProjectModal';
 import { useProjects } from './hooks/useProjects';
-import { projects as mockProjects } from './data/mockData';
 
 const viewTitles: Record<string, string> = {
   dashboard: 'ダッシュボード',
@@ -32,7 +31,7 @@ export default function Home() {
   };
 
   const activeProject = activeProjectId
-    ? mockProjects.find(p => p.id === activeProjectId)
+    ? dbProjects.find(p => p.id === activeProjectId)
     : null;
 
   const topbarTitle = activeProject
@@ -79,7 +78,7 @@ export default function Home() {
           </div>
         </div>
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {view === 'dashboard' && <Dashboard onProjectSelect={handleProjectSelect} />}
+          {view === 'dashboard' && <Dashboard onProjectSelect={handleProjectSelect} dbProjects={dbProjects} />}
           {view === 'projects' && <ProjectsList onProjectSelect={handleProjectSelect} dbProjects={dbProjects} />}
           {view === 'calendar' && <CalendarView onProjectSelect={handleProjectSelect} />}
           {view === 'project' && activeProject && <ProjectRoom project={activeProject} />}
