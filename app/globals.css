@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f5f4f1;
+  --surface: #ffffff;
+  --surface-2: #f9f8f6;
+  --border: #e4e2dc;
+  --border-strong: #ccc9c0;
+  --text: #1a1917;
+  --text-sub: #5c5a54;
+  --text-muted: #9e9b93;
+  --accent: #1e5fd4;
+  --accent-bg: #eef3fd;
+  --accent-border: #b8ccf5;
+  --danger: #c0392b;
+  --danger-bg: #fdf0ef;
+  --warning: #b45309;
+  --warning-bg: #fef9ec;
+  --success: #15803d;
+  --success-bg: #f0fdf4;
+  --ai-color: #6d28d9;
+  --ai-bg: #f5f3ff;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; }

@@ -1,0 +1,67 @@
+'use client';
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
+import ProjectRoom from './components/ProjectRoom';
+import { ProjectsList, CalendarView } from './components/OtherViews';
+import { projects } from './data/mockData';
+
+const viewTitles: Record<string, string> = {
+  dashboard: 'ダッシュボード',
+  projects: 'プロジェクト一覧',
+  calendar: 'カレンダー',
+};
+
+export default function Home() {
+  const [view, setView] = useState('dashboard');
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+
+  const handleProjectSelect = (id: string) => {
+    setActiveProjectId(id);
+    setView('project');
+  };
+
+  const handleViewChange = (v: string) => {
+    setView(v);
+    setActiveProjectId(null);
+  };
+
+  const activeProject = activeProjectId ? projects.find(p => p.id === activeProjectId) : null;
+  const topbarTitle = activeProject ? activeProject.name : viewTitles[view] || '';
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <Sidebar
+        activeView={view}
+        activeProjectId={activeProjectId}
+        onViewChange={handleViewChange}
+        onProjectSelect={handleProjectSelect}
+      />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f5f4f1' }}>
+        <div style={{
+          height: 52, padding: '0 24px', borderBottom: '1px solid #e4e2dc',
+          background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexShrink: 0,
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1917' }}>{topbarTitle}</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '6px 14px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
+              border: '1px solid #1e5fd4', background: '#1e5fd4', color: '#fff', fontFamily: 'inherit'
+            }}>
+              <Plus size={13} /> 新規プロジェクト
+            </button>
+          </div>
+        </div>
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {view === 'dashboard' && <Dashboard onProjectSelect={handleProjectSelect} />}
+          {view === 'projects' && <ProjectsList onProjectSelect={handleProjectSelect} />}
+          {view === 'calendar' && <CalendarView onProjectSelect={handleProjectSelect} />}
+          {view === 'project' && activeProject && <ProjectRoom project={activeProject} />}
+        </div>
+      </div>
+    </div>
+  );
+}
