@@ -6,12 +6,14 @@ import Dashboard from './components/Dashboard';
 import ProjectRoom from './components/ProjectRoom';
 import { ProjectsList, CalendarView } from './components/OtherViews';
 import NewProjectModal from './components/NewProjectModal';
+import ArchitectureView from './components/ArchitectureView';
 import { useProjects } from './hooks/useProjects';
 
 const viewTitles: Record<string, string> = {
   dashboard: 'ダッシュボード',
   projects: 'プロジェクト一覧',
   calendar: 'カレンダー',
+  architecture: 'システム構成図',
 };
 
 export default function Home() {
@@ -68,19 +70,22 @@ export default function Home() {
                 DB接続済 {dbProjects.length}件
               </span>
             )}
-            <button onClick={() => setShowModal(true)} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '6px 14px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
-              border: '1px solid #1e5fd4', background: '#1e5fd4', color: '#fff', fontFamily: 'inherit'
-            }}>
-              <Plus size={13} /> 新規プロジェクト
-            </button>
+            {view !== 'architecture' && (
+              <button onClick={() => setShowModal(true)} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '6px 14px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
+                border: '1px solid #1e5fd4', background: '#1e5fd4', color: '#fff', fontFamily: 'inherit'
+              }}>
+                <Plus size={13} /> 新規プロジェクト
+              </button>
+            )}
           </div>
         </div>
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {view === 'dashboard' && <Dashboard onProjectSelect={handleProjectSelect} dbProjects={dbProjects} />}
           {view === 'projects' && <ProjectsList onProjectSelect={handleProjectSelect} dbProjects={dbProjects} />}
           {view === 'calendar' && <CalendarView onProjectSelect={handleProjectSelect} />}
+          {view === 'architecture' && <ArchitectureView />}
           {view === 'project' && activeProject && <ProjectRoom project={activeProject} />}
         </div>
       </div>

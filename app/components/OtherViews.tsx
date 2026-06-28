@@ -1,4 +1,3 @@
-cat > ~/Desktop/seizou-kanri/app/components/OtherViews.tsx << 'EOF'
 'use client';
 import { ChevronLeft, ChevronRight, Folder } from 'lucide-react';
 import { useState } from 'react';
@@ -249,4 +248,3 @@ function ChevronRight({ size, color }: { size: number; color: string }) {
     </svg>
   );
 }
-EOF

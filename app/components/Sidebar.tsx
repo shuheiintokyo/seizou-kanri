@@ -1,5 +1,5 @@
 'use client';
-import { LayoutDashboard, Folder, Calendar, Circle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Folder, Calendar, Circle, LogOut, Network } from 'lucide-react';
 import { currentUser } from '../data/mockData';
 import { DBProject } from '../hooks/useProjects';
 
@@ -37,6 +37,7 @@ export default function Sidebar({ activeView, activeProjectId, onViewChange, onP
           { id: 'dashboard', label: 'ダッシュボード', Icon: LayoutDashboard },
           { id: 'projects', label: 'プロジェクト一覧', Icon: Folder },
           { id: 'calendar', label: 'カレンダー', Icon: Calendar },
+          { id: 'architecture', label: 'システム構成図', Icon: Network },
         ].map(({ id, label, Icon }) => (
           <button key={id} onClick={() => onViewChange(id)} style={{
             display: 'flex', alignItems: 'center', gap: 8, width: '100%',
